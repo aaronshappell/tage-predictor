@@ -12,13 +12,12 @@ endif
 default:
 	@echo "-- Verilator hello-world simple example"
 	@echo "--VERILATE -----------------"
-	$(VERILATOR) --cc --exe top.sv sim.cpp	
+	$(VERILATOR) --cc --exe src/v/top.sv tb/sim.cpp
 	@echo "--BUILD --------------------"
 	make -j -C obj_dir -f Vtop.mk Vtop
 	@echo "-- RUN ---------------------"
 	obj_dir/Vtop
 	@echo "-- DONE --------------------"
-	@echo "DONE"
 
 maintainer-copy::
 clean mostlyclean distclean maintainer-clean::
