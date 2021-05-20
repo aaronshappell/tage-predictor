@@ -11,7 +11,7 @@ endif
 
 default:
 	@echo "--VERILATE -----------------"
-	$(VERILATOR) --cc --exe src/v/top.sv tb/top.cpp
+	$(VERILATOR) --cc --exe -Isrc/include src/v/top.sv tb/top.cpp
 	@echo "--BUILD --------------------"
 	make -j -C obj_dir -f Vtop.mk Vtop
 	@echo "-- RUN ---------------------"
@@ -20,7 +20,7 @@ default:
 
 %:
 	@echo "--VERILATE -----------------"
-	$(VERILATOR) --cc --exe src/v/$@.sv tb/$@.cpp
+	$(VERILATOR) --cc --exe -Isrc/include src/v/$@.sv tb/$@.cpp
 	@echo "--BUILD --------------------"
 	make -j -C obj_dir -f V$@.mk V$@
 	@echo "-- RUN ---------------------"
