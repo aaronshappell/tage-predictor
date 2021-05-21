@@ -7,8 +7,7 @@ Simple always taken branch predictor
 module always_predictor
     (
         input logic clk_i,
-        input logic reset_i,
-        output logic prediction
+        output logic prediction_o
     );
-    assign prediction = `BR_TAKEN;
+    assign prediction_o = `BR_TAKEN;
 endmodule

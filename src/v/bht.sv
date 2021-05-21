@@ -1,53 +1,60 @@
 /*
-    This is a bimodal prediction history table (BHT)
+This is a bimodal prediction history table (BHT)
 
 Table Format:
-    [Bit 1][Bit 0]
+[Bit 1][Bit 0]
 
-    Bit 1: if the branch was taken or not taken
-    Bit 0: If the prediction is strong or weak
+Bit 1: if the branch was taken or not taken
+Bit 0: If the prediction is strong or weak
 
-    if prev correct
-        if curr strong, nothing changes in BHT
-        if curr weak, update entry to strong
-    if prev incorrect
-        if curr strong, update to weak
-        if curr weak, change prediction from taken to not taken or from not taken to taken
+if prev correct
+    if curr strong, nothing changes in BHT
+    if curr weak, update entry to strong
+if prev incorrect
+    if curr strong, update to weak
+    if curr weak, change prediction from taken to not taken or from not taken to taken
 */
 
+`include "common_defines.svh"
+
 module bht
-    #(parameter IDX_WIDTH = 9)
     (
         input logic clk_i,
 
-        input logic [IDX_WIDTH-1:0] w_addr_i,
-        input logic correct_i,
-        input logic [1:0] prev_prediction_i,
+        input logic [`IDX_WIDTH-1:0] w_idx_i,
+        input logic br_result_i,            // 1: branch taken, 0: branch not taken
 
-        input logic [IDX_WIDTH-1:0] r_addr_i,
-        output logic [1:0] prediction_o
+        input logic [`IDX_WIDTH-1:0] r_idx_i,
+        output logic prediction_o
     );
     
-    // BHT
-    logic [1:0] bht_data [2**IDX_WIDTH-1:0];
+    // BHT data
+    logic [1:0] bht_data [2**`IDX_WIDTH-1:0];
 
+    // Initialize data to 00 indicating a strong predict not taken entry
     initial begin
-        for (int i = 0; i < 2**IDX_WIDTH; i = i+1)
+        for (int i = 0; i < 2**`IDX_WIDTH; i = i+1)
             bht_data[i] = 2'b00;
     end
-
-    // ?
-    logic [1:0] w_data;
-    assign w_data = correct_i ? {prev_prediction_i[1], prev_prediction_i[1]} : {prev_prediction_i[0], ~prev_prediction_i[0]};
 
     // On reset, set contents of BHT to 0
     integer i;
     always_ff @(posedge clk_i) begin
         // Update previous entry based on prediction results
-        if (w_addr_i != r_addr_i)
-            bht_data[w_addr_i] <= w_data;
+        if (w_idx_i != r_idx_i) begin
+            case (bht_data[w_idx_i])
+               2'b00:
+                    bht_data[w_idx_i] <= (br_result_i ? 2'b01 : 2'b00);
+               2'b01:
+                    bht_data[w_idx_i] <= (br_result_i ? 2'b10 : 2'b00);
+               2'b10:
+                    bht_data[w_idx_i] <= (br_result_i ? 2'b11 : 2'b01);
+               2'b11:
+                    bht_data[w_idx_i] <= (br_result_i ? 2'b11 : 2'b10);
+            endcase
+        end
 
         // Output prediction for current entry
-        prediction_o <= bht_data[r_addr_i][1:0];
+        prediction_o <= bht_data[r_idx_i][1];
     end
 endmodule

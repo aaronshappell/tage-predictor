@@ -5,7 +5,8 @@
 
 #include "Vtop.h"
 
-#define NUM_TRACES 13
+// #define NUM_TRACES 13
+#define NUM_TRACES 8
 
 int main(int argc, char** argv, char** env) {
     // Prevent unused variable warnings
@@ -19,12 +20,7 @@ int main(int argc, char** argv, char** env) {
         // Statistics
         int num_branches = 0;
         int num_mispred = 0;
-
-        // Set input signals
-        top->clk_i = 0;
-        top->reset_i = 1;
-        top->eval();
-        top->reset_i = 0;
+        u_long prev_address = 0;
 
         std::string address;
         std::string branchresult;
@@ -34,17 +30,24 @@ int main(int argc, char** argv, char** env) {
             while(getline(address_file, address)) {
                 getline(branchresult_file, branchresult);
                 num_branches++;
-                //top->pc_i = std::stoi(address, nullptr, 16);
+
+                VL_PRINTF("Prev: %d, Curr: %d\n", prev_address, std::stoul(address, nullptr, 16));
+                
+                top->w_idx_i = prev_address;
+                top->br_result_i = std::stoi(branchresult);
+                top->r_idx_i = std::stoul(address, nullptr, 16);
                 top->clk_i = 1;
                 top->eval();
                 top->clk_i = 0;
                 top->eval();
                 // TEST: predict always taken
-                if(top->prediction != std::stoi(branchresult)) {
+                if (top->prediction_o != std::stoi(branchresult)) {
                     num_mispred++;
                 }
-                //top->br_result_i = std::stoi(branchresult);
+                prev_address = std::stoul(address, nullptr, 16);
             }
+
+            VL_PRINTF("TEST3\n");
             address_file.close();
             branchresult_file.close();
         } else {
