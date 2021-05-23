@@ -5,7 +5,6 @@
 
 #include "Vtop.h"
 
-// #define NUM_TRACES 13
 #define NUM_TRACES 8
 
 int main(int argc, char** argv, char** env) {
