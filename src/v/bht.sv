@@ -38,7 +38,6 @@ module bht
     end
 
     // On reset, set contents of BHT to 0
-    integer i;
     always_ff @(posedge clk_i) begin
         // Update previous entry based on prediction results
         if (w_idx_i != r_idx_i) begin
