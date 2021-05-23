@@ -21,19 +21,19 @@ module bht
     (
         input logic clk_i,
 
-        input logic [`IDX_WIDTH-1:0] w_idx_i,
-        input logic br_result_i,            // 1: branch taken, 0: branch not taken
+        input logic [`BHT_IDX_WIDTH-1:0] w_idx_i,
+        input logic br_result_i, // 1: branch taken, 0: branch not taken
 
-        input logic [`IDX_WIDTH-1:0] r_idx_i,
+        input logic [`BHT_IDX_WIDTH-1:0] r_idx_i,
         output logic prediction_o
     );
     
     // BHT data
-    logic [1:0] bht_data [2**`IDX_WIDTH-1:0];
+    logic [1:0] bht_data [2**`BHT_IDX_WIDTH-1:0];
 
     // Initialize data to 00 indicating a strong predict not taken entry
     initial begin
-        for (int i = 0; i < 2**`IDX_WIDTH; i = i+1)
+        for (int i = 0; i < 2**`BHT_IDX_WIDTH; i = i+1)
             bht_data[i] = 2'b00;
     end
 

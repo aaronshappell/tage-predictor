@@ -31,11 +31,9 @@ int main(int argc, char** argv, char** env) {
                 getline(branchresult_file, branchresult);
                 num_branches++;
 
-                uint32_t mask = 0x3ff;
-
                 top->w_idx_i = prev_address;
                 top->br_result_i = prev_branchresult;
-                top->r_idx_i = mask & std::stoul(address, nullptr, 16);
+                top->r_idx_i = std::stoul(address, nullptr, 16);
                 top->clk_i = 1;
                 top->eval();
                 top->clk_i = 0;
@@ -45,7 +43,7 @@ int main(int argc, char** argv, char** env) {
                     num_mispred++;
                 }
 
-                prev_address = mask & std::stoul(address, nullptr, 16);
+                prev_address = std::stoul(address, nullptr, 16);
                 prev_branchresult = std::stoi(branchresult);
             }
             address_file.close();
