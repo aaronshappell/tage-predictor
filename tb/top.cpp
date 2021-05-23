@@ -20,7 +20,8 @@ int main(int argc, char** argv, char** env) {
         // Statistics
         int num_branches = 0;
         int num_mispred = 0;
-        u_long prev_address = 0;
+        uint32_t prev_address = 0;
+        int prev_branchresult = 0;
 
         std::string address;
         std::string branchresult;
@@ -31,23 +32,23 @@ int main(int argc, char** argv, char** env) {
                 getline(branchresult_file, branchresult);
                 num_branches++;
 
-                VL_PRINTF("Prev: %d, Curr: %d\n", prev_address, std::stoul(address, nullptr, 16));
-                
+                uint32_t mask = 0x3ff;
+
                 top->w_idx_i = prev_address;
-                top->br_result_i = std::stoi(branchresult);
-                top->r_idx_i = std::stoul(address, nullptr, 16);
+                top->br_result_i = prev_branchresult;
+                top->r_idx_i = mask & std::stoul(address, nullptr, 16);
                 top->clk_i = 1;
                 top->eval();
                 top->clk_i = 0;
                 top->eval();
-                // TEST: predict always taken
+
                 if (top->prediction_o != std::stoi(branchresult)) {
                     num_mispred++;
                 }
-                prev_address = std::stoul(address, nullptr, 16);
-            }
 
-            VL_PRINTF("TEST3\n");
+                prev_address = mask & std::stoul(address, nullptr, 16);
+                prev_branchresult = std::stoi(branchresult);
+            }
             address_file.close();
             branchresult_file.close();
         } else {
