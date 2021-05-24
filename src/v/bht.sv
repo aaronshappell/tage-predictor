@@ -33,11 +33,10 @@ module bht
 
     // Initialize data to 00 indicating a strong predict not taken entry
     initial begin
-        for (int i = 0; i < 2**`BHT_IDX_WIDTH; i = i+1)
-            bht_data[i] = 2'b00;
+        for (int i = 0; i < 2**`BHT_IDX_WIDTH; i++)
+            bht_data[i] = 2'b0;
     end
 
-    // On reset, set contents of BHT to 0
     always_ff @(posedge clk_i) begin
         // Update previous entry based on prediction results
         if (w_idx_i != r_idx_i) begin
