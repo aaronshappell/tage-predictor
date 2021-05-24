@@ -31,6 +31,7 @@ int main(int argc, char** argv, char** env) {
                 num_branches++;
 
                 top->br_result_i = prev_branchresult;
+                top->correct_i = top->prediction_o == prev_branchresult;
                 top->idx_i = std::stoul(address, nullptr, 16);
                 top->clk_i = 1;
                 top->eval();
