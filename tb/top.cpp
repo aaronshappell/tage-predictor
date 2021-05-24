@@ -19,7 +19,6 @@ int main(int argc, char** argv, char** env) {
         // Statistics
         int num_branches = 0;
         int num_mispred = 0;
-        uint32_t prev_address = 0;
         int prev_branchresult = 0;
 
         std::string address;
@@ -31,19 +30,15 @@ int main(int argc, char** argv, char** env) {
                 getline(branchresult_file, branchresult);
                 num_branches++;
 
-                top->w_idx_i = prev_address;
                 top->br_result_i = prev_branchresult;
-                top->r_idx_i = std::stoul(address, nullptr, 16);
+                top->idx_i = std::stoul(address, nullptr, 16);
                 top->clk_i = 1;
                 top->eval();
                 top->clk_i = 0;
                 top->eval();
-
                 if (top->prediction_o != std::stoi(branchresult)) {
                     num_mispred++;
                 }
-
-                prev_address = std::stoul(address, nullptr, 16);
                 prev_branchresult = std::stoi(branchresult);
             }
             address_file.close();

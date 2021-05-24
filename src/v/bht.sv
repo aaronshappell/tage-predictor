@@ -21,12 +21,13 @@ module bht
     (
         input logic clk_i,
 
-        input logic [`BHT_IDX_WIDTH-1:0] w_idx_i,
         input logic br_result_i, // 1: branch taken, 0: branch not taken
+        input logic [`BHT_IDX_WIDTH-1:0] idx_i,
 
-        input logic [`BHT_IDX_WIDTH-1:0] r_idx_i,
         output logic prediction_o
     );
+
+    logic [`BHT_IDX_WIDTH-1:0] prev_idx;
     
     // BHT data
     logic [1:0] bht_data [2**`BHT_IDX_WIDTH-1:0];
@@ -39,20 +40,15 @@ module bht
 
     always_ff @(posedge clk_i) begin
         // Update previous entry based on prediction results
-        if (w_idx_i != r_idx_i) begin
-            case (bht_data[w_idx_i])
-               2'b00:
-                    bht_data[w_idx_i] <= (br_result_i ? 2'b01 : 2'b00);
-               2'b01:
-                    bht_data[w_idx_i] <= (br_result_i ? 2'b10 : 2'b00);
-               2'b10:
-                    bht_data[w_idx_i] <= (br_result_i ? 2'b11 : 2'b01);
-               2'b11:
-                    bht_data[w_idx_i] <= (br_result_i ? 2'b11 : 2'b10);
-            endcase
+        if (prev_idx != idx_i) begin
+            if(br_result_i && (bht_data[prev_idx] != 2'b11))
+                bht_data[prev_idx] <= bht_data[prev_idx] + 1;
+            else if(~br_result_i && (bht_data[prev_idx] != 2'b0))
+                bht_data[prev_idx] <= bht_data[prev_idx] - 1;
         end
 
         // Output prediction for current entry
-        prediction_o <= bht_data[r_idx_i][1];
+        prediction_o <= bht_data[idx_i][1];
+        prev_idx <= idx_i;
     end
 endmodule
