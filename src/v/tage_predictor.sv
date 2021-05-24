@@ -17,21 +17,41 @@ module tage_predictor
     logic [`PHIST_LEN-1:0] phist;
 
     logic [4:0] predictions;
-    logic [3:0] update_us;
+    logic pred, alt_pred;
+    logic update_u;
     logic [3:0] providers;
+    logic [4:0] alt_providers;
     logic [`TAGE_IDX_WIDTH-1:0] hash_idxs [3:0];
     logic [9:0] hash_tags [3:0];
-    logic [3:0] tag_hits;
+    logic [3:0] tag_hits, alt_tag_hits;
 
     bht T0 (.clk_i, .br_result_i, .idx_i, .prediction_o(predictions[0]));
-    tage_table T1 (.clk_i, .br_result_i, .update_u_i(update_us[0]), .provider_i(providers[0]), .hash_idx_i(hash_idxs[0]), .hash_tag_i(hash_tags[0]), .prediction_o(predictions[1]), .tag_hit_o(tag_hits[0]));
-    tage_table T2 (.clk_i, .br_result_i, .update_u_i(update_us[1]), .provider_i(providers[1]), .hash_idx_i(hash_idxs[1]), .hash_tag_i(hash_tags[1]), .prediction_o(predictions[2]), .tag_hit_o(tag_hits[1]));
-    tage_table T3 (.clk_i, .br_result_i, .update_u_i(update_us[0]), .provider_i(providers[2]), .hash_idx_i(hash_idxs[2]), .hash_tag_i(hash_tags[2]), .prediction_o(predictions[3]), .tag_hit_o(tag_hits[2]));
-    tage_table T4 (.clk_i, .br_result_i, .update_u_i(update_us[0]), .provider_i(providers[3]), .hash_idx_i(hash_idxs[3]), .hash_tag_i(hash_tags[3]), .prediction_o(predictions[4]), .tag_hit_o(tag_hits[3]));
+    tage_table T1 (.clk_i, .br_result_i, .update_u_i(update_u), .provider_i(providers[0]), .hash_idx_i(hash_idxs[0]), .hash_tag_i(hash_tags[0]), .prediction_o(predictions[1]), .tag_hit_o(tag_hits[0]));
+    tage_table T2 (.clk_i, .br_result_i, .update_u_i(update_u), .provider_i(providers[1]), .hash_idx_i(hash_idxs[1]), .hash_tag_i(hash_tags[1]), .prediction_o(predictions[2]), .tag_hit_o(tag_hits[1]));
+    tage_table T3 (.clk_i, .br_result_i, .update_u_i(update_u), .provider_i(providers[2]), .hash_idx_i(hash_idxs[2]), .hash_tag_i(hash_tags[2]), .prediction_o(predictions[3]), .tag_hit_o(tag_hits[2]));
+    tage_table T4 (.clk_i, .br_result_i, .update_u_i(update_u), .provider_i(providers[3]), .hash_idx_i(hash_idxs[3]), .hash_tag_i(hash_tags[3]), .prediction_o(predictions[4]), .tag_hit_o(tag_hits[3]));
 
     initial begin
         ghist = 0;
         phist = 0;
+    end
+
+    always_comb begin
+        providers = tag_hits[3] ? 4'b1000 :
+                    tag_hits[2] ? 4'b0100 :
+                    tag_hits[1] ? 4'b0010 :
+                    tag_hits[0] ? 4'B0001 : 4'b0;
+
+        alt_tag_hits = providers ^ tag_hits;
+        alt_providers = alt_tag_hits[2] ? 5'b01000 :
+                        alt_tag_hits[1] ? 5'b00100 :
+                        alt_tag_hits[0] ? 5'B00010 : 5'b00001;
+        alt_pred = (alt_providers & predictions) != 0;
+
+        pred = tag_hits[3] ? predictions[4] :
+                tag_hits[2] ? predictions[3] :
+                tag_hits[1] ? predictions[2] :
+                tag_hits[0] ? predictions[1] : predictions[0];
     end
 
     always_ff @(posedge clk_i) begin
@@ -56,5 +76,11 @@ module tage_predictor
                         ^{ghist[23:16], 1'b0}^{ghist[31:24], 1'b0}^{ghist[39:32], 1'b0}^{ghist[47:40], 1'b0}^{ghist[55:48], 1'b0}^{ghist[63:56], 1'b0}
                         ^{ghist[71:64], 1'b0}^{ghist[79:72], 1'b0}^{ghist[87:80], 1'b0}^{ghist[95:88], 1'b0}^{ghist[103:96], 1'b0}^{ghist[111:104], 1'b0}
                         ^{ghist[119:112], 1'b0}^{ghist[127:120], 1'b0}^{6'b0 ,ghist[129:128], 1'b0};
+
+        // Calculate update useful counter signal
+        update_u <= (pred != altpred);
+
+        // Determine final prediction
+        prediction_o <= pred;
     end
 endmodule
