@@ -21,7 +21,7 @@ module bht
     (
         input logic clk_i,
 
-        input logic br_result_i, // 1: branch taken, 0: branch not taken
+        input logic br_result_i,
         input logic [`BHT_IDX_WIDTH-1:0] idx_i,
 
         output logic prediction_o

@@ -6,5 +6,7 @@
 
 `define BHT_IDX_WIDTH   11
 `define TAGE_IDX_WIDTH  `BHT_IDX_WIDTH - 2
+`define GHIST_LEN       130
+`define PHIST_LEN       16
 
 `endif

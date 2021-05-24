@@ -1,12 +1,14 @@
 `include "common_defines.svh"
 
+// TODO: columns of u counter periodic reset alternating
+
 module tage_table
     (
         input logic clk_i,
 
         input logic br_result_i, update_u_i, provider_i,
-
-        input logic [`TAGE_IDX_WIDTH-1:0] idx_i,
+        input logic [`TAGE_IDX_WIDTH-1:0] hash_idx_i,
+        input logic [8:0] hash_tag_i
 
         output logic prediction_o, tag_hit_o;
     );
@@ -29,7 +31,7 @@ module tage_table
     always_ff @(posedge clk_i) begin
         if (provider_i) begin
             // Update prediction counter
-            if (prev_idx != idx_i) begin
+            if (prev_idx != hash_idx_i) begin
                 if (br_result_i && (ctr[prev_idx] != 3'b111))
                     ctr[prev_idx] <= ctr[prev_idx] + 1;
                 else if (~br_result && ctr[prev_idx] != 3'b0)
@@ -44,8 +46,8 @@ module tage_table
                     u[prev_idx] <= u[prev_idx] - 1;
             end
         end
-
-        prediction_o <= ctr[idx_i][2];
-        prev_idx <= idx_i;
+        tag_hit_o <= tag[hash_idx_i] == hash_tag_i;
+        prediction_o <= ctr[hash_idx_i][2];
+        prev_idx <= hash_idx_i;
     end
 endmodule
