@@ -34,7 +34,7 @@ module tage_predictor
     logic [1:0] us [3:0];
     logic [3:0] allocs;
 
-    bht c_T0 (.clk_i, .br_result_i, .update_en_i(1'b1), .idx_i(idx_i[`BHT_IDX_WIDTH-1:0]), .prediction_o(predictions[0]));
+    bht c_T0 (.clk_i, .br_result_i, .update_en_i(providers == 0), .idx_i(idx_i[`BHT_IDX_WIDTH-1:0]), .prediction_o(predictions[0]));
     tage_table c_T1 (.clk_i, .br_result_i, .update_u_i(update_u), .dec_u_i(dec_us[0]), .alloc_i(allocs[0]), .provider_i(providers[0]), .hash_idx_i(hash_idxs[0]), .hash_tag_i(hash_tags[0]), .prediction_o(predictions[1]), .tag_hit_o(tag_hits[0]), .u_o(us[0]));
     tage_table c_T2 (.clk_i, .br_result_i, .update_u_i(update_u), .dec_u_i(dec_us[1]), .alloc_i(allocs[1]), .provider_i(providers[1]), .hash_idx_i(hash_idxs[1]), .hash_tag_i(hash_tags[1]), .prediction_o(predictions[2]), .tag_hit_o(tag_hits[1]), .u_o(us[1]));
     tage_table c_T3 (.clk_i, .br_result_i, .update_u_i(update_u), .dec_u_i(dec_us[2]), .alloc_i(allocs[2]), .provider_i(providers[2]), .hash_idx_i(hash_idxs[2]), .hash_tag_i(hash_tags[2]), .prediction_o(predictions[3]), .tag_hit_o(tag_hits[2]), .u_o(us[2]));
@@ -91,8 +91,7 @@ module tage_predictor
                         ^{ghist[119:112], 1'b0}^{ghist[127:120], 1'b0}^{6'b0 ,ghist[129:128], 1'b0};
 
         // Determine final prediction
-        // prediction_o <= pred;
-        prediction_o <= predictions[0];
+        prediction_o <= pred;
 
         // Entry allocation
         if (~correct_i) begin

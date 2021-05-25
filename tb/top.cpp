@@ -5,7 +5,7 @@
 
 #include "Vtop.h"
 
-#define NUM_TRACES 8
+#define NUM_TRACES 1
 
 int main(int argc, char** argv, char** env) {
     // Prevent unused variable warnings
@@ -20,6 +20,8 @@ int main(int argc, char** argv, char** env) {
         int num_branches = 0;
         int num_mispred = 0;
         int prev_branchresult = 0;
+
+        top->update_en_i = 1;
 
         std::string address;
         std::string branchresult;

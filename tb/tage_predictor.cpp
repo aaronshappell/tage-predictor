@@ -5,7 +5,7 @@
 
 #include "Vtage_predictor.h"
 
-#define NUM_TRACES 8
+#define NUM_TRACES 1
 
 int main(int argc, char** argv, char** env) {
     // Prevent unused variable warnings
@@ -87,7 +87,7 @@ int main(int argc, char** argv, char** env) {
         VL_PRINTF("  Branches: %d\n", num_branches);
         VL_PRINTF("  Mispredictions: %d\n", num_mispred);
         VL_PRINTF("  Misprediction Rate: %f\n", mispred_rate);
-        VL_PRINTF("T0: %d, T1: %d, T2: %d, T3: %d, T4: %d\n", T0, T1, T2, T3, T4);
+        VL_PRINTF("T0 preds: %d, T1 preds: %d, T2 preds: %d, T3 preds: %d, T4 preds: %d\n", T0, T1, T2, T3, T4);
         VL_PRINTF("T0_mp: %d, T1_mp: %d, T2_mp: %d, T3_mp: %d, T4_mp: %d\n", T0_mispred, T1_mispred, T2_mispred, T3_mispred, T4_mispred);
         VL_PRINTF("T0_mpr: %f, T1_mpr: %f, T2_mpr: %f, T3_mpr: %f, T4_mpr: %f\n\n", T0_mpr, T1_mpr, T2_mpr, T3_mpr, T4_mpr);
 
