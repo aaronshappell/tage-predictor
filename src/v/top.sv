@@ -10,8 +10,8 @@ module top
         output logic prediction_o
     );
     /* verilator lint_off WIDTH */
-    // always_predictor p (.*);
-    bht b (.*);
-    // tage_predictor tp (.*);
+    // assign prediction_o = `BR_TAKEN;
+    //bht b (.*);
+    tage_predictor tp (.*);
     /* verilator lint_on WIDTH */
 endmodule

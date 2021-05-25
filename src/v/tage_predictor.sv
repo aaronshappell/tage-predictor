@@ -65,74 +65,74 @@ module tage_predictor
         
         // Calculate update useful counter signal
         update_u = (pred != alt_pred);
-    end
-
-    always_ff @(posedge clk_i) begin
-        // Update ghist/phist, always a br for sim
-        ghist <= {ghist[`GHIST_LEN-2:0], br_result_i};
-        //phist <= {phist[`PHIST_LEN-2:0], idx_i[0]};
 
         // Calculate hashed indexes
         // Hard coded for TAGE_IDX_WIDTH=9 :(
-        hash_idxs[0] <= idx_i[8:0]^idx_i[17:9]^idx_i[26:18]^{4'b0, idx_i[31:27]}^{4'b0, ghist[4:0]};//^phist[8:0]^{2'b0 ,phist[15:9]};
-        hash_idxs[1] <= idx_i[8:0]^idx_i[17:9]^idx_i[26:18]^{4'b0, idx_i[31:27]}^ghist[8:0]^{3'b0, ghist[14:9]};//^phist[8:0]^{2'b0 ,phist[15:9]};
-        hash_idxs[2] <= idx_i[8:0]^idx_i[17:9]^idx_i[26:18]^{4'b0, idx_i[31:27]}^ghist[8:0]^ghist[17:9]^ghist[26:18]^ghist[35:27]^{1'b0, ghist[43:36]};//^phist[8:0]^{2'b0 ,phist[15:9]};
-        hash_idxs[3] <= idx_i[8:0]^idx_i[17:9]^idx_i[26:18]^{4'b0, idx_i[31:27]}^ghist[8:0]^ghist[17:9]^ghist[26:18]^ghist[35:27]^ghist[44:36]^ghist[53:45]^ghist[62:54]
+        hash_idxs[0] = idx_i[8:0]^idx_i[17:9]^idx_i[26:18]^{4'b0, idx_i[31:27]}^{4'b0, ghist[4:0]};//^phist[8:0]^{2'b0 ,phist[15:9]};
+        hash_idxs[1] = idx_i[8:0]^idx_i[17:9]^idx_i[26:18]^{4'b0, idx_i[31:27]}^ghist[8:0]^{3'b0, ghist[14:9]};//^phist[8:0]^{2'b0 ,phist[15:9]};
+        hash_idxs[2] = idx_i[8:0]^idx_i[17:9]^idx_i[26:18]^{4'b0, idx_i[31:27]}^ghist[8:0]^ghist[17:9]^ghist[26:18]^ghist[35:27]^{1'b0, ghist[43:36]};//^phist[8:0]^{2'b0 ,phist[15:9]};
+        hash_idxs[3] = idx_i[8:0]^idx_i[17:9]^idx_i[26:18]^{4'b0, idx_i[31:27]}^ghist[8:0]^ghist[17:9]^ghist[26:18]^ghist[35:27]^ghist[44:36]^ghist[53:45]^ghist[62:54]
                         ^ghist[71:63]^ghist[80:72]^ghist[89:81]^ghist[98:90]^ghist[107:99]^ghist[116:108]^ghist[125:117]^{5'b0 ,ghist[129:126]};//^phist[8:0]^{2'b0 ,phist[15:9]};
         
         // Calculate hashed tags
-        hash_tags[0] <= idx_i[8:0]^{4'b0, ghist[4:0]}^{3'b0, ghist[4:0], 1'b0};
-        hash_tags[1] <= idx_i[8:0]^ghist[8:0]^{3'b0, ghist[14:9]}^{ghist[7:0], 1'b0}^{1'b0, ghist[14:8], 1'b0};
-        hash_tags[2] <= idx_i[8:0]^ghist[8:0]^ghist[17:9]^ghist[26:18]^ghist[35:27]^{1'b0, ghist[43:36]}^{ghist[7:0], 1'b0}^{ghist[15:8], 1'b0}
+        hash_tags[0] = idx_i[8:0]^{4'b0, ghist[4:0]}^{3'b0, ghist[4:0], 1'b0};
+        hash_tags[1] = idx_i[8:0]^ghist[8:0]^{3'b0, ghist[14:9]}^{ghist[7:0], 1'b0}^{1'b0, ghist[14:8], 1'b0};
+        hash_tags[2] = idx_i[8:0]^ghist[8:0]^ghist[17:9]^ghist[26:18]^ghist[35:27]^{1'b0, ghist[43:36]}^{ghist[7:0], 1'b0}^{ghist[15:8], 1'b0}
                         ^{ghist[23:16], 1'b0}^{ghist[31:24], 1'b0}^{ghist[39:32], 1'b0}^{4'b0 ,ghist[43:40], 1'b0};
-        hash_tags[3] <= idx_i[8:0]^ghist[8:0]^ghist[17:9]^ghist[26:18]^ghist[35:27]^{1'b0, ghist[43:36]}^{ghist[7:0], 1'b0}^{ghist[15:8], 1'b0}
+        hash_tags[3] = idx_i[8:0]^ghist[8:0]^ghist[17:9]^ghist[26:18]^ghist[35:27]^{1'b0, ghist[43:36]}^{ghist[7:0], 1'b0}^{ghist[15:8], 1'b0}
                         ^{ghist[23:16], 1'b0}^{ghist[31:24], 1'b0}^{ghist[39:32], 1'b0}^{ghist[47:40], 1'b0}^{ghist[55:48], 1'b0}^{ghist[63:56], 1'b0}
                         ^{ghist[71:64], 1'b0}^{ghist[79:72], 1'b0}^{ghist[87:80], 1'b0}^{ghist[95:88], 1'b0}^{ghist[103:96], 1'b0}^{ghist[111:104], 1'b0}
                         ^{ghist[119:112], 1'b0}^{ghist[127:120], 1'b0}^{6'b0 ,ghist[129:128], 1'b0};
 
         // Determine final prediction
-        prediction_o <= pred;
+        prediction_o = pred;
 
         // Entry allocation
         if (~correct_i) begin
             case (providers)
                 T0: begin
                     if (us[0] != 0 && us[1] != 0 && us[2] != 0 && us[3] != 0) // No available entries
-                        dec_us <= 4'b1111;
+                        dec_us = 4'b1111;
                     else begin
-                        dec_us <= 4'b0;
-                        allocs <= (us[0] == 0) ? T1 : (us[1] == 0) ? T2 : (us[2] == 0) ? T3 : T4;
+                        dec_us = 4'b0;
+                        allocs = (us[0] == 0) ? T1 : (us[1] == 0) ? T2 : (us[2] == 0) ? T3 : T4;
                     end
                 end
                 T1: begin
                     if (us[1] != 0 && us[2] != 0 && us[3] != 0)
-                        dec_us <= 4'b1110;
+                        dec_us = 4'b1110;
                     else begin
-                        dec_us <= 4'b0;
-                        allocs <= (us[1] == 0) ? T2 : (us[2] == 0) ? T3 : T4;
+                        dec_us = 4'b0;
+                        allocs = (us[1] == 0) ? T2 : (us[2] == 0) ? T3 : T4;
                     end
                 end
                 T2: begin
                     if (us[2] != 0 && us[3] != 0)
-                        dec_us <= 4'b1100;
+                        dec_us = 4'b1100;
                     else begin
-                        dec_us <= 4'b0;
-                        allocs <= (us[2] == 0) ? T3 : T4;
+                        dec_us = 4'b0;
+                        allocs = (us[2] == 0) ? T3 : T4;
                     end
                 end
                 T3: begin
                     if (us[3] != 0)
-                        dec_us <= 4'b1000;
+                        dec_us = 4'b1000;
                     else begin
-                        dec_us <= 4'b0;
-                        allocs <= T4;
+                        dec_us = 4'b0;
+                        allocs = T4;
                     end
                 end
                 default: begin
-                    dec_us <= 4'b0;
-                    allocs <= 4'b0;
+                    dec_us = 4'b0;
+                    allocs = 4'b0;
                 end
             endcase
         end
+    end
+
+    always_ff @(posedge clk_i) begin
+        // Update ghist/phist, always a br for sim
+        ghist <= {ghist[`GHIST_LEN-2:0], br_result_i};
+        //phist <= {phist[`PHIST_LEN-2:0], idx_i[0]};
     end
 endmodule
