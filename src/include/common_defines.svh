@@ -13,4 +13,6 @@
 `define GHIST_LEN   130
 `define PHIST_LEN   16
 
+`define PP_THRESHOLD    2863311530
+
 `endif
