@@ -5,7 +5,7 @@
 
 #include "Vtage_predictor.h"
 
-#define NUM_TRACES 8
+#define NUM_TRACES 13
 
 int main(int argc, char** argv, char** env) {
     // Prevent unused variable warnings
