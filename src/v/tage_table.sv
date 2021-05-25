@@ -8,7 +8,7 @@ module tage_table
         input logic [`TAGE_IDX_WIDTH-1:0] hash_idx_i,
         input logic [8:0] hash_tag_i,
 
-        output logic prediction_o, tag_hit_o,
+        output logic prediction_o, tag_hit_o, new_entry_o,
         output logic [1:0] u_o
     );
 
@@ -35,9 +35,12 @@ module tage_table
         u_clear_col = 0;
     end
 
+    assign new_entry_o = ((ctr[prev_idx] == `TAGE_WEAK_TAKEN || ctr[prev_idx] == `TAGE_WEAK_NOT_TAKEN) && u[prev_idx] == 2'b0);
+
     always_ff @(posedge clk_i) begin
         if (alloc_i) begin
-            ctr[prev_idx] <= br_result_i ? 3'b100 : 3'b011; // Init ctr to weak correct
+            // Init ctr to weak correct
+            ctr[prev_idx] <= br_result_i ? `TAGE_WEAK_TAKEN : `TAGE_WEAK_NOT_TAKEN;
             tag[prev_idx] <= prev_hash_tag;
             u[prev_idx] <= 2'b0;
         end

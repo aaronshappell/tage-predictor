@@ -22,6 +22,10 @@ module tage_predictor
     logic [`GHIST_LEN-1:0] ghist;
     //logic [`PHIST_LEN-1:0] phist;
 
+    logic [3:0] alt_ctr;
+    logic [3:0] new_entries;
+    logic new_entry;
+
     logic [4:0] predictions;
     logic pred, alt_pred;
     logic update_u;
@@ -35,14 +39,19 @@ module tage_predictor
     logic [3:0] allocs;
 
     bht c_T0 (.clk_i, .br_result_i, .update_en_i(providers == 0), .idx_i(idx_i[`BHT_IDX_WIDTH-1:0]), .prediction_o(predictions[0]));
-    tage_table c_T1 (.clk_i, .br_result_i, .update_u_i(update_u), .dec_u_i(dec_us[0]), .alloc_i(allocs[0]), .provider_i(providers[0]), .hash_idx_i(hash_idxs[0]), .hash_tag_i(hash_tags[0]), .prediction_o(predictions[1]), .tag_hit_o(tag_hits[0]), .u_o(us[0]));
-    tage_table c_T2 (.clk_i, .br_result_i, .update_u_i(update_u), .dec_u_i(dec_us[1]), .alloc_i(allocs[1]), .provider_i(providers[1]), .hash_idx_i(hash_idxs[1]), .hash_tag_i(hash_tags[1]), .prediction_o(predictions[2]), .tag_hit_o(tag_hits[1]), .u_o(us[1]));
-    tage_table c_T3 (.clk_i, .br_result_i, .update_u_i(update_u), .dec_u_i(dec_us[2]), .alloc_i(allocs[2]), .provider_i(providers[2]), .hash_idx_i(hash_idxs[2]), .hash_tag_i(hash_tags[2]), .prediction_o(predictions[3]), .tag_hit_o(tag_hits[2]), .u_o(us[2]));
-    tage_table c_T4 (.clk_i, .br_result_i, .update_u_i(update_u), .dec_u_i(dec_us[3]), .alloc_i(allocs[3]), .provider_i(providers[3]), .hash_idx_i(hash_idxs[3]), .hash_tag_i(hash_tags[3]), .prediction_o(predictions[4]), .tag_hit_o(tag_hits[3]), .u_o(us[3]));
+    tage_table c_T1 (.clk_i, .br_result_i, .update_u_i(update_u), .dec_u_i(dec_us[0]), .alloc_i(allocs[0]), .provider_i(providers[0]), .hash_idx_i(hash_idxs[0]),
+                        .hash_tag_i(hash_tags[0]), .prediction_o(predictions[1]), .tag_hit_o(tag_hits[0]), .new_entry_o(new_entries[0]), .u_o(us[0]));
+    tage_table c_T2 (.clk_i, .br_result_i, .update_u_i(update_u), .dec_u_i(dec_us[1]), .alloc_i(allocs[1]), .provider_i(providers[1]), .hash_idx_i(hash_idxs[1]),
+                        .hash_tag_i(hash_tags[1]), .prediction_o(predictions[2]), .tag_hit_o(tag_hits[1]), .new_entry_o(new_entries[1]), .u_o(us[1]));
+    tage_table c_T3 (.clk_i, .br_result_i, .update_u_i(update_u), .dec_u_i(dec_us[2]), .alloc_i(allocs[2]), .provider_i(providers[2]), .hash_idx_i(hash_idxs[2]),
+                        .hash_tag_i(hash_tags[2]), .prediction_o(predictions[3]), .tag_hit_o(tag_hits[2]), .new_entry_o(new_entries[2]), .u_o(us[2]));
+    tage_table c_T4 (.clk_i, .br_result_i, .update_u_i(update_u), .dec_u_i(dec_us[3]), .alloc_i(allocs[3]), .provider_i(providers[3]), .hash_idx_i(hash_idxs[3]),
+                        .hash_tag_i(hash_tags[3]), .prediction_o(predictions[4]), .tag_hit_o(tag_hits[3]), .new_entry_o(new_entries[3]), .u_o(us[3]));
 
     initial begin
         ghist = 0;
         //phist = 0;
+        alt_ctr = 0;
     end
 
     always_comb begin
@@ -85,7 +94,11 @@ module tage_predictor
                         ^{ghist[119:112], 1'b0}^{ghist[127:120], 1'b0}^{6'b0 ,ghist[129:128], 1'b0};
 
         // Determine final prediction
-        prediction_o = pred;
+        new_entry = ((new_entries & providers) != 0);
+        if (~new_entry || alt_ctr < 8)
+            prediction_o = pred;
+        else
+            prediction_o = alt_pred;
 
         // Entry allocation
         if (~correct_i) begin
@@ -134,5 +147,13 @@ module tage_predictor
         // Update ghist/phist, always a br for sim
         ghist <= {ghist[`GHIST_LEN-2:0], br_result_i};
         //phist <= {phist[`PHIST_LEN-2:0], idx_i[0]};
+
+        // Update alt counter
+        if (new_entry && update_u) begin
+            if ((alt_pred == br_result_i) && (alt_ctr != 4'b1111))
+                alt_ctr <= alt_ctr + 1;
+            else if ((alt_pred != br_result_i) && alt_ctr != 4'b0)
+                alt_ctr <= alt_ctr - 1;
+        end
     end
 endmodule
