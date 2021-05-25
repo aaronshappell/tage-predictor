@@ -1,7 +1,5 @@
 `include "common_defines.svh"
 
-// TODO: columns of u counter periodic reset alternating
-
 module tage_table
     (
         input logic clk_i,
@@ -21,6 +19,9 @@ module tage_table
 
     logic [`TAGE_IDX_WIDTH-1:0] prev_idx;
     logic [8:0] prev_hash_tag;
+
+    logic [17:0] u_clear_ctr;
+    logic u_clear_col;
     
     // Initialize tables
     initial begin
@@ -29,6 +30,9 @@ module tage_table
             tag[i] = 9'b0;
             u[i]   = 2'b0;
         end
+
+        u_clear_ctr = 0;
+        u_clear_col = 0;
     end
 
     always_ff @(posedge clk_i) begin
@@ -63,5 +67,15 @@ module tage_table
         u_o <= u[hash_idx_i];
         prev_idx <= hash_idx_i;
         prev_hash_tag <= hash_tag_i;
+
+        // Update useful clear counter
+        if (u_clear_ctr == 2**18-1) begin
+            for (int i = 0; i < `TAGE_IDX_WIDTH; i++)
+                u[i][u_clear_col] <= 0;
+
+            u_clear_ctr <= 0;
+            u_clear_col <= ~u_clear_col;
+        end else
+            u_clear_ctr <= u_clear_ctr + 1;
     end
 endmodule

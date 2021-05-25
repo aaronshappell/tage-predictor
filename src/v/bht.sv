@@ -21,7 +21,7 @@ module bht
     (
         input logic clk_i,
 
-        input logic br_result_i,
+        input logic br_result_i, update_en_i,
         input logic [`BHT_IDX_WIDTH-1:0] idx_i,
 
         output logic prediction_o
@@ -40,7 +40,7 @@ module bht
 
     always_ff @(posedge clk_i) begin
         // Update previous entry based on prediction results
-        if (prev_idx != idx_i) begin
+        if (prev_idx != idx_i && update_en_i) begin
             if(br_result_i && (bht_data[prev_idx] != 2'b11))
                 bht_data[prev_idx] <= bht_data[prev_idx] + 1;
             else if(~br_result_i && (bht_data[prev_idx] != 2'b0))
