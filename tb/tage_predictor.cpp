@@ -35,6 +35,8 @@ int main(int argc, char** argv, char** env) {
         std::ifstream branchresult_file("traces/branchresults" + std::to_string(i));
         std::ifstream conditional_file("traces/conditionals" + std::to_string(i));
         if(address_file.is_open() && branchresult_file.is_open()) {
+            getline(address_file, address);
+            num_instr = std::stoi(address);
             while(getline(address_file, address)) {
                 getline(branchresult_file, branchresult);
                 getline(conditional_file, conditional);
